@@ -48,13 +48,19 @@ impl CPU {
             match decoded {
                 opcodes::Opcode::Halt => return,
                 opcodes::Opcode::Unimplemented => unimplemented!(),
+                opcodes::Opcode::Cls => self.cls(),
                 opcodes::Opcode::SeVX{x,b} => self.se_vx(x ,b),
                 opcodes::Opcode::AddVX{x,b} => self.add_vx(x ,b),
                 opcodes::Opcode::LdXY{x,y} => self.ld_xy(x, y),
                 opcodes::Opcode::AddXY{x,y} => self.add_xy(x, y),
                 opcodes::Opcode::SubXY{x,y} => self.sub_xy(x, y),
+                _ => unimplemented!(),
             };
         }
+    }
+
+    fn cls(&mut self) {
+        self.screen = [[false; 64]; 32];
     }
 
     fn se_vx(&mut self, x: u8, byte: u8) {
@@ -116,10 +122,23 @@ mod tests {
     }
 
     #[test]
+    fn test_cls() {
+        let mut cpu = CPU::new();
+        let program : [u8; 2] = [0x00, 0xE0];
+        cpu.load(&program);
+
+        // turn on a few pixels
+        cpu.screen[10][10] = true;
+        cpu.screen[11][11] = true;
+        cpu.screen[12][12] = true;
+
+        cpu.run();
+        assert_eq!(cpu.screen, [[false; 64]; 32]);
+    }
+
+    #[test]
     fn test_ld() {
-        let program : [u8; 2] = [
-            0x80, 0x10,
-        ];
+        let program : [u8; 2] = [0x80, 0x10];
 
         let mut cpu = CPU::new();
         cpu.load(&program);

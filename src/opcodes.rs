@@ -3,11 +3,14 @@
 pub enum Opcode {
     Halt, 
     Unimplemented,
+    Cls,
+    Ret,
     SeVX{x: u8, b: u8},
     AddVX{x: u8, b: u8},
     LdXY{x: u8, y: u8},
     AddXY{x: u8, y: u8},
     SubXY{x: u8, y: u8},
+    LdI{addr: u16},
 }
 
 pub fn decode (opcode: u16) -> Opcode {
@@ -19,6 +22,8 @@ pub fn decode (opcode: u16) -> Opcode {
 
     match opcode {
         0x0000 => Opcode::Halt,
+        0x00E0 => Opcode::Cls,
+        0x00EE => Opcode::Ret,
         0x6000..=0x6FFF => Opcode::SeVX{x: x, b: byte},
         0x7000..=0x7FFF => Opcode::AddVX{x: x, b: byte},
         0x8000..=0x8FFF => 
@@ -28,6 +33,7 @@ pub fn decode (opcode: u16) -> Opcode {
                 0x5 => Opcode::SubXY{x: x, y: y},
                 _ => Opcode::Unimplemented,
             },
+        0xA000..=0xAFFF => Opcode::LdI{addr: addr},
         _ => Opcode::Unimplemented,
     }
 }
@@ -41,10 +47,13 @@ mod tests {
     fn test_decode() {
         assert_eq!(decode(0x0000), Opcode::Halt);
         assert_eq!(decode(0xFFFF), Opcode::Unimplemented);
+        assert_eq!(decode(0x00E0), Opcode::Cls);
+        assert_eq!(decode(0x00EE), Opcode::Ret);
         assert_eq!(decode(0x6CCC), Opcode::SeVX{x: 0xC, b: 0xCC});
         assert_eq!(decode(0x7CCC), Opcode::AddVX{x: 0xC, b: 0xCC});
         assert_eq!(decode(0x8AB0), Opcode::LdXY{x: 0xA, y: 0xB});
         assert_eq!(decode(0x8AB4), Opcode::AddXY{x: 0xA, y: 0xB});
         assert_eq!(decode(0x8AB5), Opcode::SubXY{x: 0xA, y: 0xB});
+        assert_eq!(decode(0xA123), Opcode::LdI{addr: 0x123});
     }
 }
