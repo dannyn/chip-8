@@ -1,5 +1,5 @@
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Opcode {
     Halt, 
     Unimplemented,
@@ -11,7 +11,6 @@ pub enum Opcode {
 }
 
 pub fn decode (opcode: u16) -> Opcode {
-
     let op_minor = (opcode & 0x000F) as u8;
     let x =        ((opcode & 0x0F00) >> 8) as u8;
     let y =        ((opcode & 0x00F0) >> 4) as u8;
@@ -30,5 +29,22 @@ pub fn decode (opcode: u16) -> Opcode {
                 _ => Opcode::Unimplemented,
             },
         _ => Opcode::Unimplemented,
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode() {
+        assert_eq!(decode(0x0000), Opcode::Halt);
+        assert_eq!(decode(0xFFFF), Opcode::Unimplemented);
+        assert_eq!(decode(0x6CCC), Opcode::SeVX{x: 0xC, b: 0xCC});
+        assert_eq!(decode(0x7CCC), Opcode::AddVX{x: 0xC, b: 0xCC});
+        assert_eq!(decode(0x8AB0), Opcode::LdXY{x: 0xA, y: 0xB});
+        assert_eq!(decode(0x8AB4), Opcode::AddXY{x: 0xA, y: 0xB});
+        assert_eq!(decode(0x8AB5), Opcode::SubXY{x: 0xA, y: 0xB});
     }
 }
