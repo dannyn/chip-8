@@ -6,6 +6,6 @@ edition = "2018"
 
 
 [dependencies]
-clap = "*"
-nom = "*"
+hex = "*"
 structopt = "*"
+itertools = "*"
